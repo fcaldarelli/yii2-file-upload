@@ -76,7 +76,7 @@ class FileUploadCore {
     */
     public static function getFileFromSessionNames($modelName, $attribute, $filename, $formSessionId)
     {
-        $keySession = sprintf('sfmobile_fileUpload-%s', $formSessionId);
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, $formSessionId);
 
         $s = \Yii::$app->session->get($keySession, []);
 
@@ -95,7 +95,7 @@ class FileUploadCore {
     }
     public static function deleteFileFromSessionNames($modelName, $attribute, $filename, $formSessionId)
     {
-        $keySession = sprintf('sfmobile_fileUpload-%s', $formSessionId);
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, $formSessionId);
 
         $s = \Yii::$app->session->get($keySession, []);
 
@@ -121,6 +121,17 @@ class FileUploadCore {
         \Yii::$app->session->set($keySession, $s);
 
         return $file;
+    }
+
+    /**
+    -----------------------
+    --- DESTROY SESSION ---
+    -----------------------
+    */
+    public static function destroySession()
+    {
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, $formSessionId);
+        \Yii::$app->session->remove($keySession);
     }
 
     /**
