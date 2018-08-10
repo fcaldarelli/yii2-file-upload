@@ -141,8 +141,7 @@ class FileUploadCore {
     */
     public static function getFromSession($model, $attribute)
     {
-        $keySession = sprintf('sfmobile_fileUpload-%s', self::getFormSessionId());
-
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, self::getFormSessionId());
         $s = \Yii::$app->session->get($keySession, []);
 
         $key = sprintf('%s_%s', \yii\helpers\StringHelper::basename(get_class($model)), $attribute);
@@ -153,7 +152,7 @@ class FileUploadCore {
     }
     public static function setInSession($model, $attribute)
     {
-        $keySession = sprintf('sfmobile_fileUpload-%s', self::getFormSessionId());
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, self::getFormSessionId());
         $s = \Yii::$app->session->get($keySession, []);
 
         $key = sprintf('%s_%s', \yii\helpers\StringHelper::basename(get_class($model)), $attribute);
@@ -309,7 +308,7 @@ class FileUploadCore {
         if(\Yii::$app->request->isPost)
         {
             // Load from session
-            $sessionFiles = self::getFromSession($model, $attribute);
+            $sessionFiles = ($fileInputIndexName == null)?self::getFromSession($model, $attribute):[];
             $formFiles = [];
 
             // Get file from form
