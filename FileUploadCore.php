@@ -174,7 +174,7 @@ class FileUploadCore {
     --- Sync ---
     ------------
     */
-    public static function sync($model, $attribute, $userId, $referId, $referTable, $section, $category)
+    public static function sync($model, $attribute, $userId, $referId, $referTable, $section, $category, $deleteFilesNotInArray = true)
     {
         $arrFiles = [];
         if(is_array($model->$attribute))
@@ -191,7 +191,11 @@ class FileUploadCore {
         {
             $f->save($userId, $referId, $referTable, $section, $category, []);
         }
-        \sfmobile\fileUpload\FileUploadWrapper::deleteFilesNotInArray($referId, $referTable, $section, $category, $arrFiles);
+
+        if($deleteFilesNotInArray)
+        {
+            \sfmobile\fileUpload\FileUploadWrapper::deleteFilesNotInArray($referId, $referTable, $section, $category, $arrFiles);
+        }
     }
 
     /**
@@ -215,9 +219,17 @@ class FileUploadCore {
     ------------
     --- Load ---
     ------------
+    * @param $formTabularIndex
+    * @param $model
+    * @param $attributeNameInput
+    * @param $referId
+    * @param $referTable
+    * @param $section
+    * @param $category
+    * @param $fileInputIndexName index name of $_FILES where get file data
     * @description to be implemented in load() model override
     */
-    public static function load($formTabularIndex, $model, $attributeNameInput, $referId, $referTable, $section, $category)
+    public static function load($formTabularIndex, $model, $attributeNameInput, $referId, $referTable, $section, $category, $fileInputIndexName = null)
     {
         // File upload
         $items = [];
@@ -228,7 +240,7 @@ class FileUploadCore {
             ->all();
         }
         $attributeName = ($formTabularIndex !== null)?sprintf('[%d]%s', $formTabularIndex, $attributeNameInput):$attributeNameInput;
-        \sfmobile\fileUpload\FileUploadCore::loadFromFormOrSession($model, $attributeName, $items);
+        \sfmobile\fileUpload\FileUploadCore::loadFromFormOrSession($model, $attributeName, $items, $fileInputIndexName);
     }
 
     /**
@@ -259,7 +271,14 @@ class FileUploadCore {
         }
         return $arrInput;
     }
-    public static function loadFromFormOrSession($model, $attribute, $dbModels)
+
+    /**
+    * @param $model
+    * @param $attribute
+    * @param $dbModels
+    * @param $fileInputIndexName index name of $_FILES where get file data
+    */
+    public static function loadFromFormOrSession($model, $attribute, $dbModels, $fileInputIndexName = null)
     {
         if((\Yii::$app->request->isPost)&&(\Yii::$app->request->post(\sfmobile\fileUpload\Module::getInstance()->formSessionKey) != self::getFormSessionId()))
         {
@@ -270,7 +289,7 @@ class FileUploadCore {
 
         $attributeIsRequiredAs = 'array';   // object, array
 
-        foreach($model->getActiveValidators($attribute) as $validator)
+        foreach($model->getActiveValidators($attributeName) as $validator)
         {
             if($validator instanceof FileValidator)
             {
@@ -296,7 +315,14 @@ class FileUploadCore {
             // Get file from form
             if(count($_FILES)>0)
             {
-                $formFiles = FileUploadWrapper::fromUploadedFiles(UploadedFile::getInstances($model, $attribute));
+                if($fileInputIndexName == null)
+                {
+                    $formFiles = FileUploadWrapper::fromUploadedFiles(UploadedFile::getInstances($model, $attribute));
+                }
+                else
+                {
+                    $formFiles = FileUploadWrapper::fromUploadedFiles([ UploadedFile::getInstanceByName($fileInputIndexName) ]);
+                }
             }
 
 
@@ -317,20 +343,20 @@ class FileUploadCore {
 
         if($attributeIsRequiredAs == 'object')
         {
-            if(count($model->$attribute)>1)
+            if(count($model->$attributeName)>1)
             {
-                $keys = array_keys($model->$attribute);
-                $model->$attribute = $model->$attribute[$keys[0]];
+                $keys = array_keys($model->$attributeName);
+                $model->$attributeName = $model->$attributeName[$keys[0]];
                 //throw new FileUploadException("FileUploadCore.loadFromFormOrSession : There are more than 1 file. Specify minFiles in 'file' validator > 1");
             }
-            else if(count($model->$attribute) == 1)
+            else if(count($model->$attributeName) == 1)
             {
-                $keys = array_keys($model->$attribute);
-                $model->$attribute = $model->$attribute[$keys[0]];
+                $keys = array_keys($model->$attributeName);
+                $model->$attributeName = $model->$attributeName[$keys[0]];
             }
-            else if(count($model->$attribute) == 0)
+            else if(count($model->$attributeName) == 0)
             {
-                $model->$attribute = null;
+                $model->$attributeName = null;
             }
         }
 
