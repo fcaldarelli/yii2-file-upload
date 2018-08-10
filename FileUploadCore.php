@@ -173,7 +173,7 @@ class FileUploadCore {
     --- Sync ---
     ------------
     */
-    public static function sync($model, $attribute, $userId, $referId, $referTable, $section, $category, $deleteFilesNotInArray = true)
+    public static function sync($model, $attribute, $userId, $referId, $referTable, $section, $category)
     {
         $arrFiles = [];
         if(is_array($model->$attribute))
@@ -191,10 +191,7 @@ class FileUploadCore {
             $f->save($userId, $referId, $referTable, $section, $category, []);
         }
 
-        if($deleteFilesNotInArray)
-        {
-            \sfmobile\fileUpload\FileUploadWrapper::deleteFilesNotInArray($referId, $referTable, $section, $category, $arrFiles);
-        }
+        \sfmobile\fileUpload\FileUploadWrapper::deleteFilesNotInArray($referId, $referTable, $section, $category, $arrFiles);
     }
 
     /**

@@ -195,3 +195,64 @@ public function actionUpdateMultiple($ids)
     ]);
 }
 ```
+
+Models from multiple files
+--------------
+
+When you need to store multiple models from multiple files, this is the right approach:
+
+**Changes to Model**
+Inside the model, in load() you will pass an extra parameter to identify  which $_FILES index to use
+```php
+<?php
+class BannerHomeIndexForm extends \common\models\BannerHome
+{
+    public $fileInputIndexName = null; // Extra parameter to specify which $_FILES index to use
+    public $formTabularIndex = null; // Needed for file upload with tabular form
+    public $image;
+
+    // Load: initialize the files attached to model
+    public function load($data, $formName = null)
+    {
+        $retLoad = parent::load($data, $formName);
+
+        // !!! ATTENTION TO LAST PARAMETER !!!!
+        \sfmobile\fileUpload\FileUploadCore::load($this->formTabularIndex, $this, 'image', $this->id, 'banner_home', 'banner_home', 'image', $this->fileInputIndexName);
+
+        return $retLoad;
+
+    }
+
+    // Delete: added files deletion
+    public function afterDelete()
+    {
+        // ... as default example ...
+    }
+
+    // Save: after saved the model, also save the files
+    public function afterSave($insert, $changedAttributes)
+    {
+        // ... as default example ...
+    }
+```
+
+**Changes to Controller**
+In Controller, you will add fileInputIndexName to pass index of $_FILES where get file data
+```php
+<?php
+public function actionIndex()
+{
+    if(\Yii::$app->request->isPost)
+    {
+        foreach($_FILES['BannerHomeForm']['name']['image'] as $indexBanner => $n)
+        {
+            $model = new BannerHomeForm();
+
+            $model->formTabularIndex = $indexBanner;
+            $model->fileInputIndexName = 'BannerHomeForm[image]['.$indexBanner.']';
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            }
+        }
+    }
+    \sfmobile\fileUpload\FileUploadCore::destroySession();
+```
