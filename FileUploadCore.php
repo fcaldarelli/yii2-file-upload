@@ -130,7 +130,7 @@ class FileUploadCore {
     */
     public static function destroySession()
     {
-        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, $formSessionId);
+        $keySession = sprintf('%s-%s', \sfmobile\fileUpload\Module::getInstance()->formSessionKey, self::getFormSessionId());
         \Yii::$app->session->remove($keySession);
     }
 
@@ -222,10 +222,11 @@ class FileUploadCore {
     * @param $referTable
     * @param $section
     * @param $category
+    * @param $saveInSession this flag will set file uploaded (and their content inside the session) so they can be get from getFromSession method. Usually it is needed (when you need to get image during editing form), but you need only upload and save, this can be set to false
     * @param $fileInputIndexName index name of $_FILES where get file data
     * @description to be implemented in load() model override
     */
-    public static function load($formTabularIndex, $model, $attributeNameInput, $referId, $referTable, $section, $category, $fileInputIndexName = null)
+    public static function load($formTabularIndex, $model, $attributeNameInput, $referId, $referTable, $section, $category, $saveInSession=true, $fileInputIndexName = null)
     {
         // File upload
         $items = [];
@@ -236,7 +237,7 @@ class FileUploadCore {
             ->all();
         }
         $attributeName = ($formTabularIndex !== null)?sprintf('[%d]%s', $formTabularIndex, $attributeNameInput):$attributeNameInput;
-        \sfmobile\fileUpload\FileUploadCore::loadFromFormOrSession($model, $attributeName, $items, $fileInputIndexName);
+        \sfmobile\fileUpload\FileUploadCore::loadFromFormOrSession($model, $attributeName, $items, $saveInSession, $fileInputIndexName);
     }
 
     /**
@@ -274,7 +275,7 @@ class FileUploadCore {
     * @param $dbModels
     * @param $fileInputIndexName index name of $_FILES where get file data
     */
-    public static function loadFromFormOrSession($model, $attribute, $dbModels, $fileInputIndexName = null)
+    public static function loadFromFormOrSession($model, $attribute, $dbModels, $saveInSession=true, $fileInputIndexName = null)
     {
         if((\Yii::$app->request->isPost)&&(\Yii::$app->request->post(\sfmobile\fileUpload\Module::getInstance()->formSessionKey) != self::getFormSessionId()))
         {
@@ -305,7 +306,7 @@ class FileUploadCore {
         if(\Yii::$app->request->isPost)
         {
             // Load from session
-            $sessionFiles = ($fileInputIndexName == null)?self::getFromSession($model, $attribute):[];
+            $sessionFiles = self::getFromSession($model, $attribute);
             $formFiles = [];
 
             // Get file from form
@@ -321,7 +322,6 @@ class FileUploadCore {
                 }
             }
 
-
             // Set attribute files
             $model->$attributeName = array_values(array_merge($sessionFiles, $formFiles));
         }
@@ -335,7 +335,7 @@ class FileUploadCore {
         $model->$attributeName = self::removeFilesWithSameName($model->$attributeName);
 
         // Save in session
-        self::setInSession($model, $attribute);
+        if($saveInSession) self::setInSession($model, $attribute);
 
         if($attributeIsRequiredAs == 'object')
         {
