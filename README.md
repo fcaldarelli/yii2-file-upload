@@ -100,7 +100,7 @@ class Articles extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         // File upload
-        \sfmobile\fileUpload\FileUploadCore::sync($this, 'photo', 1, $this->id, 'articles', 'articles', 'photo');
+        \sfmobile\fileUpload\FileUploadCore::sync($this, 'photo', \Yii::$app->user->identity->id, $this->id, 'articles', 'articles', 'photo');
 
     }
 ```
@@ -137,7 +137,7 @@ Then can insert your own file input widget or use that provided by the extension
 
 This widget is automatically configure to get validation rules from Model.
 
-** Changes to Controller **
+**Changes to Controller**
 
 Create and Update actions content is the same of standard.
 ```php
