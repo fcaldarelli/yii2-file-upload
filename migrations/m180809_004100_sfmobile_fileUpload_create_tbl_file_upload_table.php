@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Handles the creation of table `tbl_file_upload`.
  */
-class m09082018_2018_sfmobile_fileUpload_create_tbl_file_upload_table extends Migration
+class m180809_004100_sfmobile_fileUpload_create_tbl_file_upload_table extends Migration
 {
     /**
      * @inheritdoc
