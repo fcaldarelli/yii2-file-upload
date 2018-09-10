@@ -28,18 +28,21 @@ class FileUploadWrapper extends UploadedFile
 
         foreach($databaseFiles as $df)
         {
-            $m = new self();
-            $m->isFromDatabase = true;
-            $m->dbModel = $df;
-            $m->contentFile = file_get_contents($df->absolutePath);
+            if(file_exists($df->absolutePath))
+            {
+                $m = new self();
+                $m->isFromDatabase = true;
+                $m->dbModel = $df;
+                $m->contentFile = file_get_contents($df->absolutePath);
 
-            $m->name = $df->file_name_original;
-            $m->tempName = $df->absolutePath;
-            $m->type = $df->mime_type;
-            $m->size = $df->file_size;
-            $m->error = 0;
+                $m->name = $df->file_name_original;
+                $m->tempName = $df->absolutePath;
+                $m->type = $df->mime_type;
+                $m->size = $df->file_size;
+                $m->error = 0;
 
-            $outData[] = $m;
+                $outData[] = $m;
+            }
         }
 
         return $outData;
