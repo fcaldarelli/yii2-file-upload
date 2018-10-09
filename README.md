@@ -62,6 +62,13 @@ Changes to Model, View and Controller
 
 I suggest to create ModelForm class that extends Model class and add an attribute to handle files (in this case, 'photo')
 
+If you need to update other fields on database, sync() method has a last parameter $options that has this structure:
+
+```@param $options array of [ 'filter' => [  'andWhere' => [] ], 'saveFields' => [ 'array of fields' ] ]```
+
+filter->andWhere data contains other field to match the record, saveFields contains set of key=>value fields to insert/update.
+
+
 **Changes to Model**
 ```php
 <?php
