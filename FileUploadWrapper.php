@@ -10,6 +10,7 @@ namespace sfmobile\fileUpload;
 
 use yii\web\UploadedFile;
 use \sfmobile\fileUpload\models\FileUpload;
+use yii\helpers\ArrayHelper;
 
 /**
  * FileUploadWrapper
@@ -144,13 +145,20 @@ class FileUploadWrapper extends UploadedFile
         file_put_contents($pathFile, $content);
     }
 
+    /**
+    * @param $options array of [ 'filter' => [  'andWhere' => [] ], 'saveFields' => [ 'set of field => value' ] ]
+    */
     public function save($userId, $referId, $referTable, $section, $category, $options=[])
     {
         $saveContentToFile = false;
 
-        $dbRecord = FileUpload::find()
-        ->andWhere(['file_name_original' => $this->name, 'section' => $section, 'category' => $category, 'refer_id' => $referId, 'refer_table' => $referTable])
-        ->one();
+        $dbRecordQuery = FileUpload::find()
+        ->andWhere(['file_name_original' => $this->name, 'section' => $section, 'category' => $category, 'refer_id' => $referId, 'refer_table' => $referTable]);
+
+        if(ArrayHelper::getValue($options, 'filter.andWhere')!=null) $dbRecordQuery->andWhere(ArrayHelper::getValue($options, 'filter.andWhere'));
+
+        $dbRecord = $dbRecordQuery->one();
+
         if($dbRecord != null)
         {
             $absolutePathFile = $dbRecord->absolutePath;
@@ -188,6 +196,13 @@ class FileUploadWrapper extends UploadedFile
             $dbRecord->update_time = null;
             $dbRecord->relative_path = $dbRecord->relativePathFromDbRecord();
 
+            if(ArrayHelper::getValue($options, 'saveFields')!=null)
+            {
+                foreach(ArrayHelper::getValue($options, 'saveFields') as $sfKey => $sfValue)
+                {
+                    $dbRecord->setAttribute($sfKey, $sfValue);
+                }
+            }
             $saveContentToFile = true;
 
             $this->dbModel = $dbRecord;
