@@ -55,18 +55,21 @@ class FileUploadWrapper extends UploadedFile
 
         foreach($uploadedFiles as $up)
         {
-            $m = new self();
-            $m->isFromDatabase = false;
-            $m->dbModel = null;
-            $m->contentFile = file_get_contents($up->tempName);
+            if($up != null)
+            {
+                $m = new self();
+                $m->isFromDatabase = false;
+                $m->dbModel = null;
+                $m->contentFile = file_get_contents($up->tempName);
 
-            $m->name = $up->name;
-            $m->tempName = $up->tempName;
-            $m->type = $up->type;
-            $m->size = $up->size;
-            $m->error = $up->error;
+                $m->name = $up->name;
+                $m->tempName = $up->tempName;
+                $m->type = $up->type;
+                $m->size = $up->size;
+                $m->error = $up->error;
 
-            $outData[] = $m;
+                $outData[] = $m;
+            }
         }
 
         return $outData;

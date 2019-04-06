@@ -25,6 +25,7 @@ class FileInSessionController extends Controller
 
     public function actionDelete($model, $attr, $name, $sid)
     {
+        $attr = urldecode($attr);
         $obj = \sfmobile\fileUpload\FileUploadCore::deleteFileFromSessionNames($model, $attr, $name, $sid);
 
         $out = ['action' => 'none'];
