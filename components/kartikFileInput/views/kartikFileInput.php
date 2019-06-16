@@ -26,6 +26,7 @@ foreach($filesInSession as $fis)
         'type' => $previewType,
         'caption' => $fis->name,
         'size' => $fis->size,
+        'filetype' => $mimeType,
         'url' => $fis->fileInSessionDeleteAction($model, $attribute)
    ];
 }
