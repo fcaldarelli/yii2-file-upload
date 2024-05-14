@@ -20,27 +20,29 @@ class Module extends \yii\base\Module
     public $formSessionKey = 'sfmobile_fileUpload_form_sessionKey';
 
     /**
-     * Base path for uploaded file
-     * @since 1.0
-     */
-    public $basePath;
-
-    /**
-     * Base url for file uploaded
-     * @since 1.0
-     */
-    public $baseUrl;
-
-    /**
      * Database table name
      * @since 1.0
      */
     public $dbTableName = 'tbl_file_upload';
 
     /**
+     * Default storage when create a new file
+     * @since 1.0
+     */
+    public $defaultStorage = 'local';    
+
+    /**
+     * List of storages. Implementation of Storage interface
+     * The first storage is default
+     * @since 1.0
+     */
+    public $storages = [];
+
+    /**
      * @inheritdoc
      */
     public $controllerNamespace = 'sfmobile\fileUpload\controllers';
+
 
     /**
      * @inheritdoc

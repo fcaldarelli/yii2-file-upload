@@ -30,14 +30,26 @@ class FileUpload extends \yii\db\ActiveRecord
     {
         parent::afterDelete();
 
+        $storage = $this->getStorage();
+
         // Cancella tutti i files relativi a quel filename (le varie versioni a risoluzioni diverse)
-        if(file_exists($this->absolutePath))
+        if($storage->fileExists($this))
         {
-            @unlink($this->absolutePath);
+            $storage->deleteFile($this);
         }
     }
 
-
+    /**
+	 **************************************
+	 * Storage
+	 **************************************
+    */
+    private function getStorage()
+    {
+        $storages = \sfmobile\fileUpload\Module::getInstance()->storages;
+        $foundStorage = \Yii::createObject($storages[$this->storage]);
+        return $foundStorage;
+    }
 
     /**
 	 **************************************
@@ -58,15 +70,7 @@ class FileUpload extends \yii\db\ActiveRecord
 
     public function getAbsolutePath()
     {
-        $out = null;
-        $rel = $this->relativePath;
-
-        if($rel != null)
-        {
-            $basePath = \sfmobile\fileUpload\Module::getInstance()->basePath;
-            $out = $basePath.$rel;
-        }
-        return $out;
+        return $this->getStorage()->getAbsolutePath($this->relativePath);
     }
 
     /**
@@ -75,34 +79,18 @@ class FileUpload extends \yii\db\ActiveRecord
     */
     public function getUrl($isAbsoluteUrl=false, $options=null)
     {
-        $out = null;
-        $rel = $this->relativePathFromDbRecord();
-
-        if($rel != null)
-        {
-            $baseUrl = \sfmobile\fileUpload\Module::getInstance()->baseUrl;
-            $out = $baseUrl.$rel;
-
-            // If it is requested an absolute url, it checks that fileUploadbaseUrl is already in absolute form.
-            // If it is already absolute, it does nothing, otherwise apply baseUrl.
-            if($isAbsoluteUrl)
-            {
-                if((strpos(strtolower($baseUrl), 'http://')===0)||(strpos(strtolower($baseUrl), 'https://')===0))
-                {
-                    // do nothing because fileUploadBaseUrl is already absolute
-                }
-                else
-                {
-                    // it apply host base url
-                    $out = \yii\helpers\Url::to($out, true);
-                }
-            }
-
-        }
-        return $out;
+        return $this->getStorage()->getUrl($this, $isAbsoluteUrl, $options);
     }
 
+    public function saveContent($content)
+    {
+        return $this->getStorage()->saveContent($content, $this);
+    }
 
+    public function readContent()
+    {
+        return $this->getStorage()->readContent($this);
+    }
 
     /**
      * @inheritdoc

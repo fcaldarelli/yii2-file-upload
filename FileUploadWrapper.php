@@ -141,11 +141,9 @@ class FileUploadWrapper extends UploadedFile
     --- SAVE THE FILE ---
     ---------------------
     */
-    private function saveContentToFile($content, $pathFile)
+    private function saveContentToFile($content, $fileUpload)
     {
-        $basedir = dirname($pathFile);
-        if(file_exists($basedir) == false) @mkdir($basedir, 0777, true);
-        file_put_contents($pathFile, $content);
+        $fileUpload->saveContent($content);
     }
 
     /**
@@ -198,6 +196,7 @@ class FileUploadWrapper extends UploadedFile
             $dbRecord->create_time = date('Y-m-d H:i:s');
             $dbRecord->update_time = null;
             $dbRecord->relative_path = $dbRecord->relativePathFromDbRecord();
+            $dbRecord->storage = \sfmobile\fileUpload\Module::getInstance()->defaultStorage;
 
             if(ArrayHelper::getValue($options, 'saveFields')!=null)
             {
@@ -221,8 +220,7 @@ class FileUploadWrapper extends UploadedFile
             }
 
             // Update the content
-            $absolutePathFile = $dbRecord->absolutePath;
-            $this->saveContentToFile($this->contentFile, $absolutePathFile);
+            $this->saveContentToFile($this->contentFile, $dbRecord);
         }
 
         return $dbRecord;
