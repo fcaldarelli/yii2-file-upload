@@ -93,7 +93,7 @@ class S3Storage extends Component implements Storage
         $cmd = $client->getCommand('GetObject', [
             'Bucket' => $this->s3Bucket,
             'Key'    => $this->getKey($fileUpload->relativePath),
-            'ResponseContentDisposition' => 'attachment; filename="' . $fileUpload->file_name_original . '"',
+            'ResponseContentDisposition' => 'attachment; filename="' . urlencode($fileUpload->file_name_original) . '"',
         ]);
     
         $request = $client->createPresignedRequest($cmd, '+1 minutes');
