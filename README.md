@@ -35,12 +35,27 @@ Once the extension is installed, configure it in config\main.php setting imageBa
     'fileUploader' => [
         'class' => 'sfmobile\fileUpload\Module',
 
-        // Base path and url for files
-        'basePath' =>  '/var/www/vhosts/your_hosting/public_files',
-        'baseUrl' =>  '/public_files',
-
         // Database table name to save files metadata
         'dbTableName' => 'tbl_file_upload',
+
+        'defaultStorage' => 's3prod',
+
+        'storages' => [
+            's3prod' => [
+                'class' => 'sfmobile\fileUpload\storages\S3Storage',
+
+                's3Key' => 'PROD',
+                's3Secret' => '1234567',
+                's3Endpoint' => 'https://mys3',
+                's3Bucket' => 'mybucket',
+            ],                
+            'local' => [
+                'class' => 'sfmobile\fileUpload\storages\FileSystemStorage',
+
+                'basePath' =>  '/var/www/vhosts/your_hosting/public_files',
+                'baseUrl' =>  '/public_files',
+            ],
+        ]        
     ],
 ],
 ```
