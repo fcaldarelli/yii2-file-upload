@@ -21,12 +21,7 @@ class FileUploadWrapper extends UploadedFile
     public $dbModel;
 
     // Contains file data
-    private $contentFile;
-
-    public function getContentFile() 
-    {
-        return file_get_contents($this->tempName);
-    }
+    public $contentFile;
 
     public static function fromDatabaseFiles($databaseFiles)
     {
@@ -39,7 +34,7 @@ class FileUploadWrapper extends UploadedFile
                 $m = new self();
                 $m->isFromDatabase = true;
                 $m->dbModel = $df;
-                // $m->contentFile = file_get_contents($df->absolutePath);
+                $m->contentFile = file_get_contents($df->absolutePath);
 
                 $m->name = $df->file_name_original;
                 $m->tempName = $df->absolutePath;
@@ -65,7 +60,7 @@ class FileUploadWrapper extends UploadedFile
                 $m = new self();
                 $m->isFromDatabase = false;
                 $m->dbModel = null;
-                // $m->contentFile = file_get_contents($up->tempName);
+                $m->contentFile = file_get_contents($up->tempName);
 
                 $m->name = $up->name;
                 $m->tempName = $up->tempName;
