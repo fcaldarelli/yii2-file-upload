@@ -43,6 +43,11 @@ class Module extends \yii\base\Module
      */
     public $controllerNamespace = 'sfmobile\fileUpload\controllers';
 
+    /**
+     * @inheritdoc
+     */
+    public $fileUploadWrapperEventsClass = \sfmobile\fileUpload\FileUploadWrapperEvents::class;
+
 
     /**
      * @inheritdoc

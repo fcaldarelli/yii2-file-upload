@@ -151,6 +151,9 @@ class FileUploadWrapper extends UploadedFile
     */
     public function save($userId, $referId, $referTable, $section, $category, $options=[])
     {
+        $fileUploadWrapperEvents = (\sfmobile\fileUpload\Module::getInstance()->fileUploadWrapperEventsClass != null) ? new (\sfmobile\fileUpload\Module::getInstance()->fileUploadWrapperEventsClass)() : null;
+
+
         $saveContentToFile = false;
 
         $dbRecordQuery = FileUpload::find()
@@ -212,6 +215,12 @@ class FileUploadWrapper extends UploadedFile
 
         if($saveContentToFile)
         {
+            $userObject = [];
+
+            if($fileUploadWrapperEvents) {
+                $fileUploadWrapperEvents->beforeSave($this, $dbRecord, $this->contentFile, $userObject);
+            }
+            
             $retSave = $dbRecord->save();
 
             if($retSave == false)
@@ -221,6 +230,11 @@ class FileUploadWrapper extends UploadedFile
 
             // Update the content
             $this->saveContentToFile($this->contentFile, $dbRecord);
+
+            if($fileUploadWrapperEvents) {
+                $fileUploadWrapperEvents->afterSave($this, $dbRecord, $this->contentFile, $userObject);
+            }
+
         }
 
         return $dbRecord;
